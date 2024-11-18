@@ -16,11 +16,16 @@
                 <span>Dashboard</span>
 
                 <span class="ms-auto d-sm-flex flex-row">
-
                 </span>
             </div>
 
             <div class="card-body">
+
+                @if(session('error'))
+                    <div class="alert alert-danger">
+                        {{ session('error') }}
+                    </div>
+                @endif
 
                 <x-alert />
 

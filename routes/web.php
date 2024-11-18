@@ -21,21 +21,37 @@ Route::post('/store-user-login', [LoginController::class, 'store'])->name('login
 // Recuperar senha
 Route::get('/forgot-password', [ForgotPasswordController::class, 'showForgotPassword'])->name('forgot-password.show');
 Route::post('/forgot-password', [ForgotPasswordController::class, 'submitForgotPassword'])->name('forgot-password.submit');
-
 Route::get('/reset-password/{token}', [ForgotPasswordController::class, 'showResetPassword'])->name('password.reset');
 Route::post('/reset-password', [ForgotPasswordController::class, 'submitResetPassword'])->name('reset-password.submit');
 
+// Rotas protegidas por autenticação
 Route::group(['middleware' => 'auth'], function () {
 
     // Dashboard
     Route::get('/index-dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
 
     // Perfil
-    Route::get('/show-profile', [ProfileController::class, 'show'])->name('profile.show');
-    Route::get('/edit-profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/update-profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::get('/edit-profile-password', [ProfileController::class, 'editPassword'])->name('profile.edit-password');
-    Route::put('/update-profile-password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
+    Route::group(['prefix' => 'profile', 'as' => 'profile.'], function () {
+        Route::get('/show', [ProfileController::class, 'show'])
+            ->name('show')
+            ->middleware('auth'); // Exibe os detalhes do perfil
+
+        Route::get('/edit', [ProfileController::class, 'edit'])
+            ->name('edit')
+            ->middleware('auth'); // Carrega o formulário de edição
+
+        Route::put('/update', [ProfileController::class, 'update'])
+            ->name('update')
+            ->middleware('auth'); // Atualiza os dados do perfil
+
+        Route::get('/edit-password', [ProfileController::class, 'editPassword'])
+            ->name('edit-password')
+            ->middleware('auth'); // Carrega o formulário para alterar senha
+
+        Route::put('/update-password', [ProfileController::class, 'updatePassword'])
+            ->name('update-password')
+            ->middleware('auth'); // Atualiza a senha do perfil
+    });
 
     // Usuários
     Route::group(['middleware' => 'role:Super Admin|Admin|Professor|Tutor'], function () {
@@ -53,11 +69,6 @@ Route::group(['middleware' => 'auth'], function () {
         Route::delete('/destroy-user/{user}', [UserController::class, 'destroy'])->name('user.destroy');
     });
 
-    Route::group(['middleware' => 'role:Super Admin|Admin|Professor'], function () {
-        Route::get('/edit-user/{user}', [UserController::class, 'edit'])->name('user.edit');
-        Route::put('/update-user/{user}', [UserController::class, 'update'])->name('user.update');
-    });
-
     // Cursos
     Route::group(['middleware' => 'role:Super Admin|Admin|Professor|Tutor|Aluno'], function () {
         Route::get('/index-course', [CourseController::class, 'index'])->name('course.index');
@@ -73,15 +84,20 @@ Route::group(['middleware' => 'auth'], function () {
     });
 
     // Aulas
+
     Route::group(['middleware' => 'role:Super Admin|Admin|Professor|Tutor|Aluno'], function () {
         Route::get('/index-classe/{course}', [ClasseController::class, 'index'])->name('classe.index');
         Route::get('/show-classe/{classe}', [ClasseController::class, 'show'])->name('classe.show');
+    });
+
+    Route::group(['middleware' => 'role:Super Admin|Admin|Professor|Tutor'], function () {
         Route::get('/create-classe/{course}', [ClasseController::class, 'create'])->name('classe.create');
         Route::post('/store-classe', [ClasseController::class, 'store'])->name('classe.store');
         Route::get('/edit-classe/{classe}', [ClasseController::class, 'edit'])->name('classe.edit');
         Route::put('/update-classe/{classe}', [ClasseController::class, 'update'])->name('classe.update');
         Route::delete('/destroy-classe/{classe}', [ClasseController::class, 'destroy'])->name('classe.destroy');
     });
+
 
     // Papéis
     Route::get('/index-role', [RoleController::class, 'index'])->name('role.index')->middleware('permission:index-role');
@@ -94,4 +110,3 @@ Route::group(['middleware' => 'auth'], function () {
     // Permissão do papel
     Route::get('/index-role-permission/{role}', [RolePermissionController::class, 'index'])->name('role-permission.index')->middleware('permission:index-role-permission');
 });
-

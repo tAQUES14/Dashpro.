@@ -9,7 +9,7 @@ class DashboardController extends Controller
     // Dashboard
     public function index()
     {
-        // Carregar a VIEW
-        return view('dashboard.index', ['menu' => 'dashboard']);
+        // Retorna a view com a variável de erro se existir
+        return view('dashboard.index', ['menu' => 'dashboard', 'error' => session('error')]);
     }
 }
