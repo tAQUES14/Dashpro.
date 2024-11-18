@@ -18,6 +18,10 @@ class LoginController extends Controller
     // Login
     public function index()
     {
+
+        // Salvar log
+        Log::info('Carregar o formulário de login');
+
         // Carregar a VIEW
         return view('login.index');
     }
@@ -59,6 +63,9 @@ class LoginController extends Controller
         // Atribuir as permissões ao usuário
         $user->syncPermissions($permissions);
 
+        // Salvar log
+        Log::info('Login realizado', ['email' => $request->email, 'action_user_id' => Auth::id()]);
+
         // Redirecionar o usuário
         return redirect()->route('dashboard.index');
     }
@@ -66,6 +73,10 @@ class LoginController extends Controller
     // Carregar o formulário cadastrar novo usuário
     public function create()
     {
+
+        // Salvar log
+        Log::info('Carregar formulário cadastrar usuário no login.');
+
         // Carregar a VIEW
         return view('login.create');
     }
@@ -78,8 +89,6 @@ class LoginController extends Controller
 
         // Marca o ponto inicial de uma transação
         DB::beginTransaction();
-
-        
 
         try {
 
@@ -118,6 +127,9 @@ class LoginController extends Controller
     // Deslogar o usuário
     public function destroy()
     {
+
+        // Salvar log
+        Log::warning('Logout', ['action_user_id' => Auth::id()]);
 
         // Deslogar o usuário
         Auth::logout();

@@ -132,40 +132,43 @@ class RoleController extends Controller
 
     // Excluir o papel do banco de dados
     public function destroy(Role $role)
-    {
-        if ($role->name == 'Super Admin') {
-            // Salvar log
-            Log::warning('Papel super admin não pode ser excluído.', ['papel_id' => $role->id, 'action_user_id' => Auth::id()]);
+{
+    // Carregar o relacionamento 'users' para evitar o erro de acesso mágico
+    $role->load('users');
 
-            // Redirecionar o usuário, enviar a mensagem de erro
-            return redirect()->route('role.index')->with('error', 'Papel super admin não pode ser excluído!');
-        }
+    // Verificar se o papel é 'Super Admin'
+    if ($role->name == 'Super Admin') {
+        // Salvar log
+        Log::warning('Papel super admin não pode ser excluído.', ['papel_id' => $role->id, 'action_user_id' => Auth::id()]);
 
-        // Não permitir excluir papel quando tem algum usuário utilizando o papel
-        if ($role->users->isNotEmpty()) {
-            // Salvar log
-            Log::warning('Papel não pode ser excluído porque há usuários associados.', ['papel_id' => $role->id, 'action_user_id' => Auth::id()]);
-
-            // Redirecionar o usuário, enviar a mensagem de erro
-            return redirect()->route('role.index')->with('error', 'Não é possível excluir o papel porque há usuários associados a ele.');
-        }
-
-        try {
-            // Excluir o registro do banco de dados
-            $role->delete();
-
-            // Salvar log
-            Log::info('Papel excluído.', ['id' => $role->id, 'action_user_id' => Auth::id()]);
-
-            // Redirecionar o usuário, enviar a mensagem de sucesso
-            return redirect()->route('role.index')->with('success', 'Papel excluído com sucesso!');
-        } catch (Exception $e) {
-
-            // Salvar log
-            Log::warning('Papel não excluído.', ['error' => $e->getMessage(), 'action_user_id' => Auth::id()]);
-
-            // Redirecionar o usuário, enviar a mensagem de erro
-            return redirect()->route('role.index')->with('error', 'Papel não excluído!');
-        }
+        // Redirecionar o usuário, enviar a mensagem de erro
+        return redirect()->route('role.index')->with('error', 'Papel super admin não pode ser excluído!');
     }
+
+    // Verificar se há usuários associados ao papel
+    if ($role->users->isNotEmpty()) {
+        // Salvar log
+        Log::warning('Papel não pode ser excluído porque há usuários associados.', ['papel_id' => $role->id, 'action_user_id' => Auth::id()]);
+
+        // Redirecionar o usuário, enviar a mensagem de erro
+        return redirect()->route('role.index')->with('error', 'Não é possível excluir o papel porque há usuários associados a ele.');
+    }
+
+    try {
+        // Excluir o registro do banco de dados
+        $role->delete();
+
+        // Salvar log
+        Log::info('Papel excluído.', ['id' => $role->id, 'action_user_id' => Auth::id()]);
+
+        // Redirecionar o usuário, enviar a mensagem de sucesso
+        return redirect()->route('role.index')->with('success', 'Papel excluído com sucesso!');
+    } catch (Exception $e) {
+        // Salvar log de erro
+        Log::warning('Papel não excluído.', ['error' => $e->getMessage(), 'action_user_id' => Auth::id()]);
+
+        // Redirecionar o usuário, enviar a mensagem de erro
+        return redirect()->route('role.index')->with('error', 'Papel não excluído!');
+    }
+}
 }

@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container-fluid px-4">
-        <div class="mb-1 hstack gap-2">
+        <div class="mb-1 hstack gap-10">
             <h2 class="mt-3">Curso</h2>
 
             <ol class="breadcrumb mb-3 mt-3 ms-auto">

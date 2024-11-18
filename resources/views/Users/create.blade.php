@@ -16,8 +16,10 @@
                 <span>Cadastrar</span>
                 <span class="ms-auto d-sm-flex flex-row">
 
-                    <a href="{{ route('user.index') }}" class="btn btn-info btn-sm me-1"><i class="fa-solid fa-list"></i>
-                        Listar</a>
+                    @can('index-user')
+                        <a href="{{ route('user.index') }}" class="btn btn-info btn-sm me-1"><i class="fa-solid fa-list"></i>
+                            Listar</a>
+                    @endcan
 
                 </span>
             </div>
@@ -62,6 +64,10 @@
                             @empty
                             @endforelse
                         </select>
+                    </div>
+
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-success btn-sm">Cadastrar</button>
                     </div>
 
                 </form>

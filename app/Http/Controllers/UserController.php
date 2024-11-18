@@ -55,46 +55,49 @@ class UserController extends Controller
 
     // Cadastrar no banco de dados o novo curso
     public function store(UserRequest $request)
-    {
+{
+    // Validar o formulário
+    $request->validated();
 
-        // Validar o formulário
-        $request->validated();
+    // Marca o ponto inicial de uma transação
+    DB::beginTransaction();
 
-        // Marca o ponto inicial de uma transação
-        DB::beginTransaction();
+    try {
+        // Cadastrar no banco de dados na tabela usuários
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password), // Certifique-se de hash para segurança
+        ]);
 
-        try {
+        // Atribuir o papel de Aluno automaticamente, além do papel selecionado (se houver)
+        $user->assignRole('Aluno');
 
-            // Cadastrar no banco de dados na tabela usuários
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => $request->password,
-            ]);
-
-            // Cadastrar papel para o usuário
+        // Se algum papel adicional foi selecionado, adiciona também
+        if ($request->has('roles') && !empty($request->roles)) {
             $user->assignRole($request->roles);
-
-            // Salvar log
-            Log::info('Usuário cadastrado.', ['id' => $user->id, 'action_user_id' => Auth::id()]);
-
-            // Operação é concluída com êxito
-            DB::commit();
-
-            // Redirecionar o usuário, enviar a mensagem de sucesso
-            return redirect()->route('user.show', ['user' => $user->id])->with('success', 'Usuário cadastrado com sucesso!');
-        } catch (Exception $e) {
-
-            // Salvar log
-            Log::info('Usuário não cadastrado.', ['error' => $e->getMessage(), 'action_user_id' => Auth::id()]);
-
-            // Operação não é concluída com êxito
-            DB::rollBack();
-
-            // Redirecionar o usuário, enviar a mensagem de erro
-            return back()->withInput()->with('error', 'Usuário não cadastrado!');
         }
+
+        // Salvar log
+        Log::info('Usuário cadastrado e atribuído ao papel Aluno.', ['id' => $user->id, 'action_user_id' => Auth::id()]);
+
+        // Operação é concluída com êxito
+        DB::commit();
+
+        // Redirecionar o usuário, enviar a mensagem de sucesso
+        return redirect()->route('user.show', ['user' => $user->id])->with('success', 'Usuário cadastrado com sucesso e atribuído ao papel Aluno!');
+    } catch (Exception $e) {
+        // Salvar log
+        Log::info('Usuário não cadastrado.', ['error' => $e->getMessage(), 'action_user_id' => Auth::id()]);
+
+        // Operação não é concluída com êxito
+        DB::rollBack();
+
+        // Redirecionar o usuário, enviar a mensagem de erro
+        return back()->withInput()->with('error', 'Usuário não cadastrado!');
     }
+}
+
 
     // Carregar o formulário editar usuário
     public function edit(User $user)

@@ -40,8 +40,8 @@
                 </div>
 
                 <div class="small">
-                    Usuário: cesar@celke.com.br<br>
-                    Senha: 123456a
+                    Usuário: marcostaques13@gmail.com<br>
+                    Senha: 1234567
                 </div>
             </div>
 
